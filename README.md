@@ -1,11 +1,11 @@
 # instrument-experiment skill
 
-A Claude Code skill that instruments Python training programs with [p95](https://pypi.org/project/p95/) for experiment tracking and metrics logging.
+A Claude Code skill that instruments Python training applications with [p95](https://pypi.org/project/p95/) for experiment tracking and metrics logging.
 
 ## What it does
 
 When invoked, this skill guides Claude to:
-1. Install p95 into your project
+1. Install p95
 2. Wrap your training loop with a `Run` context manager
 3. Log hyperparameters via `log_config` and metrics via `log_metrics`
 4. Show you how to inspect results with the `pnf` CLI
