@@ -51,6 +51,40 @@ run.complete()
   - `config.json` — hyperparameters logged via `log_config`
   - `run.db` — all metrics in a SQLite table named `metrics` (columns: `name`, `step`, `value`, `time`); query with `sqlite3 run.db "SELECT name, step, value FROM metrics ORDER BY name, step"`
 
+## 4. Show the user the CLI cheatsheet
+
+After instrumenting, always show the user the following so they can explore results themselves:
+
+---
+
+**Using the `pnf` CLI**
+
+> If you installed with `uv`, prefix commands with `uv run` (e.g. `uv run pnf ls`). With `pip`, run `pnf` directly.
+
+| Command | What it does |
+|---|---|
+| `pnf ls` | List all runs across all projects |
+| `pnf ls --project <name>` | List runs for a specific project |
+| `pnf ls --logdir <path>` | Use a custom log directory (default: `./logs`) |
+| `pnf show <run-id>` | Show summary for a run (config + metric stats) |
+| `pnf show <run-id> --logdir <path>` | Same, with a custom log directory |
+| `pnf tui` | Open the interactive TUI to explore all runs and metrics |
+
+**Example workflow after a training run:**
+
+```bash
+# List runs in your project
+pnf ls --project my-project
+
+# Show summary of a specific run (use the short id from ls)
+pnf show abc123
+
+# Explore runs and metrics interactively
+pnf tui
+```
+
+---
+
 ## Best practices
 - Prefer using the context manager, it will automatically close the run when the code exits.
 - Use descriptive and short names for the project and run, this will help you find them later.
