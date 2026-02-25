@@ -69,6 +69,7 @@ After instrumenting, always show the user the following so they can explore resu
 | `pnf show <run-id>` | Show summary for a run (config + metric stats) |
 | `pnf show <run-id> --logdir <path>` | Same, with a custom log directory |
 | `pnf tui` | Open the interactive TUI to explore all runs and metrics |
+| `pnf serve` | Launch a local web UI to explore runs and metrics in the browser |
 
 **Example workflow after a training run:**
 
@@ -79,8 +80,9 @@ pnf ls --project my-project
 # Show summary of a specific run (use the short id from ls)
 pnf show abc123
 
-# Explore runs and metrics interactively
-pnf tui
+# Explore runs and metrics interactively (pick one)
+pnf tui       # terminal UI
+pnf serve     # web UI in your browser
 ```
 
 ---
