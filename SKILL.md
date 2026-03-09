@@ -51,7 +51,33 @@ run.complete()
   - `config.json` — hyperparameters logged via `log_config`
   - `run.db` — all metrics in a SQLite table named `metrics` (columns: `name`, `step`, `value`, `time`); query with `sqlite3 run.db "SELECT name, step, value FROM metrics ORDER BY name, step"`
 
-## 4. Show the user the CLI cheatsheet
+## 4. Fetching results from the cloud (remote projects)
+
+When the user has a remote project (`team/app` format) and wants to inspect runs or sweeps, fetch data directly from the API using `WebFetch`. The base URL is `https://p.ninetyfive.gg/api/v1`.
+
+Authentication requires a Bearer token — ask the user for their API key (`P95_API_KEY`) if not already known.
+
+**Useful endpoints:**
+
+| What | Request |
+|---|---|
+| List runs | `GET /api/v1/teams/{team}/apps/{app}/runs` |
+| Get run details | `GET /api/v1/runs/{run_id}` |
+| List metric names | `GET /api/v1/runs/{run_id}/metrics` |
+| Metrics summary (min/max/mean) | `GET /api/v1/runs/{run_id}/metrics/summary` |
+| Latest metric values | `GET /api/v1/runs/{run_id}/metrics/latest` |
+| Full metric time series | `GET /api/v1/runs/{run_id}/metrics/{metric_name}` |
+| List sweeps | `GET /api/v1/teams/{team}/apps/{app}/sweeps` |
+| Get sweep details | `GET /api/v1/sweeps/{sweep_id}` |
+
+**Example workflow to answer "which run had the best val_loss?":**
+1. `GET /api/v1/teams/{team}/apps/{app}/runs` — get run list with IDs
+2. For each run: `GET /api/v1/runs/{run_id}/metrics/summary` — find the minimum `val_loss`
+3. Report the best run ID, its config, and the metric value to the user
+
+Always link the user to `https://p.ninetyfive.gg/{team}/{app}` so they can explore visually too.
+
+## 5. Show the user the CLI cheatsheet
 
 After instrumenting, always show the user the following so they can explore results themselves:
 
