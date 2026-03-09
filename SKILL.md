@@ -87,6 +87,81 @@ pnf serve     # web UI in your browser
 
 ---
 
+## 5. Hyperparameter Sweeps
+
+Use `p95.sweep` + `p95.agent` to search over hyperparameters automatically.
+
+```python
+import p95
+from p95.sweep import SweepConfig, ParameterSpec
+
+# 1. Create the sweep (returns a sweep_id)
+sweep_id = p95.sweep(
+    project="my-project",
+    config=SweepConfig(
+        method="random",        # "random" or "grid"
+        metric="val_loss",      # metric to optimize
+        goal="minimize",        # "minimize" or "maximize"
+        parameters=[
+            ParameterSpec("lr", "log_uniform", min=1e-5, max=0.1),
+            ParameterSpec("batch_size", "categorical", values=[16, 32, 64]),
+            ParameterSpec("epochs", "int", min=5, max=50),
+            ParameterSpec("dropout", "uniform", min=0.0, max=0.5),
+        ],
+        max_runs=20,
+        # Optional: stop poor runs early
+        early_stopping={"method": "median", "min_steps": 5, "warmup": 3},
+    ),
+)
+
+# 2. Define a training function — any Run created inside is auto-linked to the sweep
+def train(params):
+    with p95.Run(project="my-project") as run:
+        run.log_config(params)
+        for epoch in range(int(params["epochs"])):
+            loss = train_epoch(lr=params["lr"], batch_size=params["batch_size"])
+            run.log_metrics({"val_loss": loss}, step=epoch)
+
+            # Optional: prune poorly performing runs early
+            if p95.should_prune(run, "val_loss", loss, epoch):
+                print("Pruning run")
+                break
+
+# 3. Run the agent — it loops until the sweep is complete
+p95.agent(sweep_id, train)
+```
+
+### ParameterSpec types
+
+| type | required fields | description |
+|---|---|---|
+| `"uniform"` | `min`, `max` | Uniform float sample |
+| `"log_uniform"` | `min`, `max` | Log-uniform float sample (good for learning rates) |
+| `"int"` | `min`, `max` | Uniform integer sample |
+| `"categorical"` | `values` | Random choice from a list |
+
+### Viewing sweeps
+
+For **remote projects** (`team/app` format), sweeps are visible in the web UI at:
+
+```
+https://p.ninetyfive.gg/<team>/<app>/sweeps
+```
+
+For **local projects**, use the `pnf` CLI — sweep runs appear alongside regular runs:
+
+```bash
+pnf ls --project my-project
+pnf tui    # or pnf serve for the browser UI
+```
+
+### Notes
+- `p95.sweep` returns a sweep ID. For local projects (no `/` in name), it starts with `local:`.
+- `p95.agent` runs continuously until `max_runs` is hit or all grid combinations are exhausted.
+- Pass `count=N` to `p95.agent` to limit how many runs this agent executes (useful for distributed sweeps).
+- `p95.should_prune(run, metric_name, value, step)` returns `True` when a run is performing below the median of completed runs at that step. Only effective when `early_stopping` is configured.
+- A `static` config shared across all runs can be passed via `SweepConfig(config={...})`.
+
 ## Best practices
 - Prefer using the context manager, it will automatically close the run when the code exits.
 - Use descriptive and short names for the project and run, this will help you find them later.
