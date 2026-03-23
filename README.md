@@ -41,6 +41,10 @@ Claude will invoke this skill automatically when you ask things like:
 - "Instrument my training script with p95"
 - "Add experiment tracking to my training loop"
 - "Log my training metrics"
+- "Track hyperparameters for this experiment"
+- "Run a hyperparameter sweep"
+- "Compare ML runs"
+- "Set up p95 in my Python project"
 
 You can also invoke it manually:
 
