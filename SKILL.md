@@ -1,6 +1,6 @@
 ---
 name: instrument-experiment
-description: Instruments Python training scripts and ML experiments with p95 for run tracking, metrics logging, config management, and hyperparameter sweeps. Use when user asks to "add experiment tracking", "instrument my training loop", "log training metrics", "track hyperparameters", "run a hyperparameter sweep", or "compare ML runs". Also use proactively when user asks to write or implement a training script, train a neural network, reproduce a model, or analyse training results — instrument with p95 as part of the implementation.
+description: Instruments Python training scripts and ML experiments with p95 for run tracking, metrics logging, config management, hyperparameter sweeps, and public run sharing. Use when user asks to "add experiment tracking", "instrument my training loop", "log training metrics", "track hyperparameters", "run a hyperparameter sweep", "compare ML runs", "share my run", or "give someone a link to my results". Also use proactively when user asks to write or implement a training script, train a neural network, reproduce a model, or analyse training results — instrument with p95 as part of the implementation.
 ---
 
 Guidelines to aid LLMs use p95 to instrument Python training programs.
@@ -187,6 +187,28 @@ pnf tui    # or pnf serve for the browser UI
 - Pass `count=N` to `p95.agent` to limit how many runs this agent executes (useful for distributed sweeps).
 - `p95.should_prune(run, metric_name, value, step)` returns `True` when a run is performing below the median of completed runs at that step. Only effective when `early_stopping` is configured.
 - A `static` config shared across all runs can be passed via `SweepConfig(config={...})`.
+
+## 6. Sharing runs
+
+Pass `share=True` to `Run` to automatically create a public share link when the run finishes. The link is printed to stdout and requires no additional steps.
+
+```python
+with Run(
+    project="team/app",
+    name="experiment-1",
+    share=True,   # prints share link on completion
+) as run:
+    for epoch in range(10):
+        run.log_metrics({"loss": train()}, step=epoch)
+
+# → p95: Share your run at https://p95.run/aB12cD34
+```
+
+- **Remote mode only.** `share=True` is ignored (with a warning) in local mode — the project must be in `team/app` format with `P95_API_KEY` set or provided in the Run configuration.
+- The share link is public and requires no login to view.
+- If the API call fails, a warning is printed but the run itself is unaffected.
+
+**When to use `share=True` proactively:** if the user asks to share results, send a link to a collaborator, or make a run publicly accessible, add `share=True` to the `Run` constructor and surface the printed URL to the user.
 
 ## Best practices
 - Prefer using the context manager, it will automatically close the run when the code exits.
