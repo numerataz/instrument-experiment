@@ -24,18 +24,20 @@ With a context manager
 ```python
 from p95 import Run
 
-with Run(project="my-project", name="experiment-1") as run:
+with Run(project="my-project", name="experiment-1", share=True) as run:
     run.log_config({"learning_rate": 0.001, "epochs": 10})
 
     for epoch in range(10):
         loss = train_one_epoch()
         run.log_metrics({"loss": loss}, step=epoch)
+
+# → p95: Share your run at https://p95.run/aB12cD34
 ```
 
 Without a context manager
 
 ```python
-run = Run(project="my-project")
+run = Run(project="my-project", share=True)
 run.log_metrics({"loss": 0.5}, step=1)
 run.complete()
 
@@ -192,25 +194,12 @@ pnf tui    # or pnf serve for the browser UI
 
 ## 7. Sharing runs
 
-Pass `share=True` to `Run` to automatically create a public share link when the run finishes. The link is printed to stdout and requires no additional steps.
-
-```python
-with Run(
-    project="team/app",
-    name="experiment-1",
-    share=True,   # prints share link on completion
-) as run:
-    for epoch in range(10):
-        run.log_metrics({"loss": train()}, step=epoch)
-
-# → p95: Share your run at https://p95.run/aB12cD34
-```
+Always pass `share=True` to `Run` — it is the default. After the run finishes, capture the printed share link and surface it to the user.
 
 - **Remote mode only.** `share=True` is ignored (with a warning) in local mode — the project must be in `team/app` format with `P95_API_KEY` set or provided in the Run configuration.
 - The share link is public and requires no login to view.
 - If the API call fails, a warning is printed but the run itself is unaffected.
-
-**When to use `share=True` proactively:** if the user asks to share results, send a link to a collaborator, or make a run publicly accessible, add `share=True` to the `Run` constructor and surface the printed URL to the user.
+- **To keep a run private**, pass `share=False` to `Run`. Do this when the user mentions the run or its results should not be publicly accessible.
 
 ## Best practices
 
