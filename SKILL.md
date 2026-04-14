@@ -11,9 +11,9 @@ it has a local mode that allows the user to run and collect all the results loca
 ## 1. Install p95
 
 Before implementing:
+
 - Make sure p95 is installed. Add it using `pip install p95` or `uv add p95`, can be checked in the requirements.txt file or pyproject.toml dependencies.
 - `pnf` (the CLI) is installed automatically alongside p95. If you install it with `uv`, you run it with `uv run pnf`, with `pip` you run it with `pnf` directly.
-
 
 ## 2. Instrument with p95
 
@@ -59,18 +59,19 @@ Authentication requires a Bearer token — ask the user for their API key (`P95_
 
 **Useful endpoints:**
 
-| What | Request |
-|---|---|
-| List runs | `GET /api/v1/teams/{team}/apps/{app}/runs` |
-| Get run details | `GET /api/v1/runs/{run_id}` |
-| List metric names | `GET /api/v1/runs/{run_id}/metrics` |
-| Metrics summary (min/max/mean) | `GET /api/v1/runs/{run_id}/metrics/summary` |
-| Latest metric values | `GET /api/v1/runs/{run_id}/metrics/latest` |
-| Full metric time series | `GET /api/v1/runs/{run_id}/metrics/{metric_name}` |
-| List sweeps | `GET /api/v1/teams/{team}/apps/{app}/sweeps` |
-| Get sweep details | `GET /api/v1/sweeps/{sweep_id}` |
+| What                           | Request                                           |
+| ------------------------------ | ------------------------------------------------- |
+| List runs                      | `GET /api/v1/teams/{team}/apps/{app}/runs`        |
+| Get run details                | `GET /api/v1/runs/{run_id}`                       |
+| List metric names              | `GET /api/v1/runs/{run_id}/metrics`               |
+| Metrics summary (min/max/mean) | `GET /api/v1/runs/{run_id}/metrics/summary`       |
+| Latest metric values           | `GET /api/v1/runs/{run_id}/metrics/latest`        |
+| Full metric time series        | `GET /api/v1/runs/{run_id}/metrics/{metric_name}` |
+| List sweeps                    | `GET /api/v1/teams/{team}/apps/{app}/sweeps`      |
+| Get sweep details              | `GET /api/v1/sweeps/{sweep_id}`                   |
 
 **Example workflow to answer "which run had the best val_loss?":**
+
 1. `GET /api/v1/teams/{team}/apps/{app}/runs` — get run list with IDs
 2. For each run: `GET /api/v1/runs/{run_id}/metrics/summary` — find the minimum `val_loss`
 3. Report the best run ID, its config, and the metric value to the user
@@ -87,15 +88,15 @@ After instrumenting, always show the user the following so they can explore resu
 
 > If you installed with `uv`, prefix commands with `uv run` (e.g. `uv run pnf ls`). With `pip`, run `pnf` directly.
 
-| Command | What it does |
-|---|---|
-| `pnf ls` | List all runs across all projects |
-| `pnf ls --project <name>` | List runs for a specific project |
-| `pnf ls --logdir <path>` | Use a custom log directory (default: `./logs`) |
-| `pnf show <run-id>` | Show summary for a run (config + metric stats) |
-| `pnf show <run-id> --logdir <path>` | Same, with a custom log directory |
-| `pnf tui` | Open the interactive TUI to explore all runs and metrics |
-| `pnf serve` | Launch a local web UI to explore runs and metrics in the browser |
+| Command                             | What it does                                                     |
+| ----------------------------------- | ---------------------------------------------------------------- |
+| `pnf ls`                            | List all runs across all projects                                |
+| `pnf ls --project <name>`           | List runs for a specific project                                 |
+| `pnf ls --logdir <path>`            | Use a custom log directory (default: `./logs`)                   |
+| `pnf show <run-id>`                 | Show summary for a run (config + metric stats)                   |
+| `pnf show <run-id> --logdir <path>` | Same, with a custom log directory                                |
+| `pnf tui`                           | Open the interactive TUI to explore all runs and metrics         |
+| `pnf serve`                         | Launch a local web UI to explore runs and metrics in the browser |
 
 **Example workflow after a training run:**
 
@@ -113,7 +114,7 @@ pnf serve     # web UI in your browser
 
 ---
 
-## 5. Hyperparameter Sweeps
+## 6. Hyperparameter Sweeps
 
 Use `p95.sweep` + `p95.agent` to search over hyperparameters automatically.
 
@@ -159,12 +160,12 @@ p95.agent(sweep_id, train)
 
 ### ParameterSpec types
 
-| type | required fields | description |
-|---|---|---|
-| `"uniform"` | `min`, `max` | Uniform float sample |
-| `"log_uniform"` | `min`, `max` | Log-uniform float sample (good for learning rates) |
-| `"int"` | `min`, `max` | Uniform integer sample |
-| `"categorical"` | `values` | Random choice from a list |
+| type            | required fields | description                                        |
+| --------------- | --------------- | -------------------------------------------------- |
+| `"uniform"`     | `min`, `max`    | Uniform float sample                               |
+| `"log_uniform"` | `min`, `max`    | Log-uniform float sample (good for learning rates) |
+| `"int"`         | `min`, `max`    | Uniform integer sample                             |
+| `"categorical"` | `values`        | Random choice from a list                          |
 
 ### Viewing sweeps
 
@@ -182,13 +183,14 @@ pnf tui    # or pnf serve for the browser UI
 ```
 
 ### Notes
+
 - `p95.sweep` returns a sweep ID. For local projects (no `/` in name), it starts with `local:`.
 - `p95.agent` runs continuously until `max_runs` is hit or all grid combinations are exhausted.
 - Pass `count=N` to `p95.agent` to limit how many runs this agent executes (useful for distributed sweeps).
 - `p95.should_prune(run, metric_name, value, step)` returns `True` when a run is performing below the median of completed runs at that step. Only effective when `early_stopping` is configured.
 - A `static` config shared across all runs can be passed via `SweepConfig(config={...})`.
 
-## 6. Sharing runs
+## 7. Sharing runs
 
 Pass `share=True` to `Run` to automatically create a public share link when the run finishes. The link is printed to stdout and requires no additional steps.
 
@@ -211,5 +213,6 @@ with Run(
 **When to use `share=True` proactively:** if the user asks to share results, send a link to a collaborator, or make a run publicly accessible, add `share=True` to the `Run` constructor and surface the printed URL to the user.
 
 ## Best practices
+
 - Prefer using the context manager, it will automatically close the run when the code exits.
 - Use descriptive and short names for the project and run, this will help you find them later.
