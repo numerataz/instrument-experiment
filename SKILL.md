@@ -86,7 +86,7 @@ run.complete()
 
 ## 5. Fetching results from the cloud (remote projects)
 
-When the user has a remote project and wants to inspect runs or sweeps, fetch data directly from the API using `WebFetch`. The base URL is `https://p.ninetyfive.gg/api/v1`.
+When the user has a remote project and wants to inspect runs or sweeps, fetch data directly from the API using `WebFetch`. The base URL is `https://api.p.ninetyfive.gg/api/v1`.
 
 Authentication requires a Bearer token. Use the API key from `pnf cloud status` (ask the user for it if not already known, or ask them to run `pnf cloud login`). Otherwise, use the API key from `P95_API_KEY`.
 
