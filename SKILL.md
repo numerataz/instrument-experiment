@@ -8,6 +8,13 @@ Guidelines to aid LLMs use p95 to instrument Python training programs.
 p95 is a small Python library that helps users run ML experiments and track their results.
 It supports a **local mode** (file-based, zero config) and a **remote mode** (cloud-backed, requires login).
 
+## Default behavior
+
+- Treat **public sharing as the default** for p95 runs.
+- In **remote mode**, instantiate `Run(..., share=True)` unless the user explicitly asks for a private run or says the results should not be public.
+- In **local mode**, still write `share=True` in code examples for consistency, but explain that sharing is ignored until the project is moved to remote mode.
+- After a shared remote run completes, surface the printed share URL to the user.
+
 ## 1. Check cloud authentication first
 
 Before doing anything else, run:
@@ -46,6 +53,8 @@ Use the project format that matches the mode:
 
 - **Remote mode** (logged in): `project="<team>/<project-name>"` — e.g. `project="acme/resnet-cifar"`
 - **Local mode**: `project="<project-name>"` — e.g. `project="resnet-cifar"`
+
+When writing code, do not rely on the library default. Pass `share=True` explicitly on every `Run(...)` call unless the user asked for a private run.
 
 With a context manager:
 
@@ -179,7 +188,7 @@ sweep_id = p95.sweep(
 
 # 2. Define a training function — any Run created inside is auto-linked to the sweep
 def train(params):
-    with p95.Run(project="acme/resnet-cifar") as run:
+    with p95.Run(project="acme/resnet-cifar", share=True) as run:
         run.log_config(params)
         for epoch in range(int(params["epochs"])):
             loss = train_epoch(lr=params["lr"], batch_size=params["batch_size"])
@@ -228,12 +237,12 @@ pnf tui    # or pnf serve for the browser UI
 
 ## 8. Sharing runs
 
-Always pass `share=True` to `Run` — it is the default. After the run finishes, capture the printed share link and surface it to the user.
+Use `share=False` only when the user explicitly asks for a private run or says the results should not be publicly accessible.
 
 - **Remote mode only.** `share=True` is ignored (with a warning) in local mode — the project must be in `team/app` format with credentials configured.
 - The share link is public and requires no login to view.
 - If the API call fails, a warning is printed but the run itself is unaffected.
-- **To keep a run private**, pass `share=False` to `Run`. Do this when the user mentions the run or its results should not be publicly accessible.
+- To keep a run private, pass `share=False` to `Run`.
 
 ## 9. Publishing Writeups
 
